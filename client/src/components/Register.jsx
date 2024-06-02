@@ -32,7 +32,6 @@ const Register = () => {
     e.preventDefault();
     setIsButtonDisabled(true);
 
-    console.log("Registering user");
     if (!name || !username || !password) return;
 
     const user = {
@@ -46,11 +45,9 @@ const Register = () => {
       {
         loading: "Registering user...",
         success: (data) => {
-          console.log("SUCCESS: ", data);
           return data;
         },
         error: (error) => {
-          console.log("ERROR: ", error);
           return error;
         },
       },

@@ -63,8 +63,6 @@ const Login = () => {
     navigate("/dashboard");
   }
 
-  console.log({ isLoading });
-
   return (
     <CenterContainer>
       <Toaster />

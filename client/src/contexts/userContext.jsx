@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 import Cookies from "js-cookie";
+import { startRegistration } from "@simplewebauthn/browser";
 
 const HOST = "http://localhost:3000";
 
@@ -12,7 +13,6 @@ const initialState = {
 const userContext = createContext();
 
 function reducer(state, action) {
-  console.log(action.payload);
   switch (action.type) {
     case "LOADING":
       return {
@@ -39,7 +39,6 @@ const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const token = Cookies.get("token");
-    console.log("Token", token);
     if (token) {
       getUser(token);
     }
@@ -55,7 +54,6 @@ const UserProvider = ({ children }) => {
         body: JSON.stringify(user),
       })
         .then((response) => {
-          console.log({ response });
           if (!response.ok) {
             reject("Error registering user!");
           }
@@ -91,7 +89,6 @@ const UserProvider = ({ children }) => {
               reject(data.message);
             }
 
-            console.log("After reject!");
             dispatch({ type: "SUCCESS_AUTH", payload: data.user });
             if (data.token) Cookies.set("token", data.token);
             resolve("User logged in successfully!");
@@ -120,8 +117,29 @@ const UserProvider = ({ children }) => {
         },
       });
       const data = await response.json();
-      console.log(data);
       dispatch({ type: "SUCCESS_AUTH", payload: data.user });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function registerChallenge() {
+    try {
+      const token = Cookies.get("token");
+      const response = await fetch(
+        `${HOST}/api/v1/challenges/register-challenge`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      console.log(data.options);
+      const authResult = await startRegistration(data.options);
+      console.log({ authResult });
     } catch (error) {
       console.error(error);
     }
@@ -134,8 +152,9 @@ const UserProvider = ({ children }) => {
         error,
         currentUser,
         registerUser,
-        getUser,
         loginUser,
+        getUser,
+        registerChallenge,
       }}
     >
       {children}

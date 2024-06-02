@@ -5,8 +5,13 @@ import { Card, CardDescription } from "./ui/card";
 import { useUser } from "../contexts/userContext";
 
 const Dashboard = () => {
-  const { currentUser } = useUser();
+  const { currentUser, registerChallenge } = useUser();
   console.log({ currentUser });
+
+  function handleCreateKeys(e) {
+    e.preventDefault();
+    registerChallenge();
+  }
 
   return (
     <div>
@@ -16,7 +21,7 @@ const Dashboard = () => {
             <CardDescription>
               Welcome, <strong>{currentUser?.name}</strong>
             </CardDescription>
-            <Button>
+            <Button onClick={handleCreateKeys}>
               <LockClosedIcon className="w-4 h-4 mr-2" />
               Create PassKeys
             </Button>

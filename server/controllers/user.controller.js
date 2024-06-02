@@ -27,7 +27,6 @@ exports.protect = async (req, res, next) => {
 
   // verification of the token
   const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  console.log({ decode });
 
   // check if the user still exists
   const currentUser = await User.findById(decode.id);
@@ -71,9 +70,7 @@ exports.createUser = async (req, res) => {
 
     const user = await User.create(req.body);
 
-    setTimeout(() => {
-      createSendToken(user, 201, res);
-    }, 10000);
+    createSendToken(user, 201, res);
   } catch (error) {
     res.status(400).json({
       status: "fail",
