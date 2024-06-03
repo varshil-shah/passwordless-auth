@@ -4,13 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription } from "./ui/card";
 import { useUser } from "../contexts/userContext";
 
+import toast, { Toaster } from "react-hot-toast";
+
 const Dashboard = () => {
   const { currentUser, registerChallenge } = useUser();
   console.log({ currentUser });
 
   function handleCreateKeys(e) {
     e.preventDefault();
-    registerChallenge();
+
+    toast.promise(
+      registerChallenge(),
+      {
+        loading: "Creating PassKeys...",
+        success: (data) => {
+          return data;
+        },
+        error: (error) => {
+          return error.message;
+        },
+      },
+      { position: "top-right" }
+    );
   }
 
   return (
@@ -27,6 +42,7 @@ const Dashboard = () => {
             </Button>
           </div>
         </Card>
+        <Toaster />
       </CenterContainer>
     </div>
   );

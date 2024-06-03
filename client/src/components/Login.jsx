@@ -30,12 +30,28 @@ const Login = () => {
   const { isLoading, loginUser, loginChallenge } = useUser();
   const navigate = useNavigate();
 
-  function handlePasskeyAuth(e) {
+  async function handlePasskeyAuth(e) {
     e.preventDefault();
 
     if (!username) return;
 
-    loginChallenge(username);
+    await toast.promise(
+      loginChallenge(username),
+      {
+        loading: "Verifying passkeys...",
+        success: (data) => {
+          return data;
+        },
+        error: (error) => {
+          return error;
+        },
+      },
+      { position: "top-right" }
+    );
+
+    setUsername("");
+
+    navigate("/dashboard");
   }
 
   async function handleSubmit(e) {

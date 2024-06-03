@@ -127,73 +127,91 @@ const UserProvider = ({ children }) => {
   }
 
   async function registerChallenge() {
-    try {
-      const token = Cookies.get("token");
-      const response = await fetch(
-        `${HOST}/api/v1/challenges/register-challenge`,
-        {
+    return new Promise((resolve, reject) => {
+      try {
+        const token = Cookies.get("token");
+        fetch(`${HOST}/api/v1/challenges/register-challenge`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
-      const data = await response.json();
-      const authResult = await startRegistration(data.options);
-
-      fetch(`${HOST}/api/v1/challenges/register-verification`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ credential: authResult }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-        });
-    } catch (error) {
-      console.error(error);
-    }
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            startRegistration(data.options)
+              .then((authResult) => {
+                fetch(`${HOST}/api/v1/challenges/register-verification`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({ credential: authResult }),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    if (data.status === "fail") reject(data.message);
+                    resolve("Challenge registered successfully!");
+                  });
+              })
+              .catch((error) => {
+                console.error(error);
+                reject(error.message);
+              });
+          });
+      } catch (error) {
+        console.error(error);
+        reject(error.message);
+      }
+    });
   }
 
   async function loginChallenge(username) {
-    console.log("Login challenge");
-    try {
-      const response = await fetch(
-        `${HOST}/api/v1/challenges/login-challenge`,
-        {
+    return new Promise((resolve, reject) => {
+      try {
+        dispatch({ type: "LOADING" });
+        fetch(`${HOST}/api/v1/challenges/login-challenge`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ username }),
-        }
-      );
-      const data = await response.json();
-      console.log({ data });
-      const authResult = await startAuthentication(data.options);
-      console.log({ authResult });
-
-      fetch(`${HOST}/api/v1/challenges/login-verification`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, credential: authResult }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
         })
-        .catch((error) => {
-          console.error(error);
-        });
-    } catch (error) {
-      console.log(error);
-    }
+          .then((response) => response.json())
+          .then((data) => {
+            startAuthentication(data.options)
+              .then((authResult) => {
+                fetch(`${HOST}/api/v1/challenges/login-verification`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ username, credential: authResult }),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    console.log({ data });
+                    if (data.status === "fail") {
+                      dispatch({ type: "LOADING", payload: false });
+                      console.log({ msg: data.message });
+                      reject(data.message);
+                    }
+                    dispatch({ type: "SUCCESS_AUTH", payload: data.user });
+                    if (data.token) Cookies.set("token", data.token);
+                    resolve("User logged in!");
+                  });
+              })
+              .catch((error) => {
+                console.error({ error });
+                reject(error.message);
+              });
+          });
+      } catch (error) {
+        console.log({ error });
+        reject(error.message);
+      }
+    });
   }
 
   return (

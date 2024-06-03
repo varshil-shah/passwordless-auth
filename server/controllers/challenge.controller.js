@@ -1,5 +1,6 @@
 const Challenge = require("../models/challenge.model");
 const User = require("../models/user.model");
+const jwt = require("jsonwebtoken");
 
 const {
   generateRegistrationOptions,
@@ -8,6 +9,34 @@ const {
   verifyAuthenticationResponse,
 } = require("@simplewebauthn/server");
 const { isoUint8Array } = require("@simplewebauthn/server/helpers");
+
+const signToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+
+const createSendToken = (user, statusCode, res, verified) => {
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  const token = signToken(user._id);
+
+  res.cookie("jwt", token, cookieOptions);
+
+  // Remove password from the output
+  user.password = undefined;
+  user.passkey = undefined;
+
+  res.status(statusCode).json({
+    status: "success",
+    token,
+    user,
+  });
+};
 
 exports.registerChallenge = async (req, res) => {
   try {
@@ -208,12 +237,7 @@ exports.loginVerification = async (req, res) => {
       });
     }
 
-    res.status(200).json({
-      status: "success",
-      verified: result.verified,
-      message: "Verification successful",
-      user,
-    });
+    createSendToken(user, 200, res, result.verified);
   } catch (error) {
     console.log(error);
     res.status(400).json({
