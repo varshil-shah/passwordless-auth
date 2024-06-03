@@ -27,8 +27,16 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
-  const { isLoading, loginUser } = useUser();
+  const { isLoading, loginUser, loginChallenge } = useUser();
   const navigate = useNavigate();
+
+  function handlePasskeyAuth(e) {
+    e.preventDefault();
+
+    if (!username) return;
+
+    loginChallenge(username);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -112,7 +120,7 @@ const Login = () => {
         </CardContent>
         <CardFooter className="flex flex-col space-y-3">
           <DashLine />
-          <Button className="w-full">
+          <Button className="w-full" onClick={handlePasskeyAuth}>
             <LockClosedIcon className="w-4 h-4 mr-2" />
             Login with passkeys
           </Button>

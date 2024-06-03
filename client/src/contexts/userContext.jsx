@@ -1,6 +1,9 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 import Cookies from "js-cookie";
-import { startRegistration } from "@simplewebauthn/browser";
+import {
+  startRegistration,
+  startAuthentication,
+} from "@simplewebauthn/browser";
 
 const HOST = "http://localhost:3000";
 
@@ -137,11 +140,59 @@ const UserProvider = ({ children }) => {
         }
       );
       const data = await response.json();
-      console.log(data.options);
       const authResult = await startRegistration(data.options);
-      console.log({ authResult });
+
+      fetch(`${HOST}/api/v1/challenges/register-verification`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ credential: authResult }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+        });
     } catch (error) {
       console.error(error);
+    }
+  }
+
+  async function loginChallenge(username) {
+    console.log("Login challenge");
+    try {
+      const response = await fetch(
+        `${HOST}/api/v1/challenges/login-challenge`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username }),
+        }
+      );
+      const data = await response.json();
+      console.log({ data });
+      const authResult = await startAuthentication(data.options);
+      console.log({ authResult });
+
+      fetch(`${HOST}/api/v1/challenges/login-verification`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, credential: authResult }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -155,6 +206,7 @@ const UserProvider = ({ children }) => {
         loginUser,
         getUser,
         registerChallenge,
+        loginChallenge,
       }}
     >
       {children}

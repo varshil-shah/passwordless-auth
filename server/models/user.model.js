@@ -16,7 +16,10 @@ const userSchema = new mongoose.Schema({
     required: [true, "Please provide a password"],
   },
   passkey: {
-    type: mongoose.Schema.Types.Mixed,
+    credentialID: String,
+    credentialPublicKey: Buffer,
+    counter: Number,
+    transports: [String],
   },
 });
 
