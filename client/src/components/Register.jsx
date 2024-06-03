@@ -45,9 +45,12 @@ const Register = () => {
       {
         loading: "Registering user...",
         success: (data) => {
+          setIsButtonDisabled(false);
           return data;
         },
         error: (error) => {
+          setIsButtonDisabled(false);
+          console.log({ error });
           return error;
         },
       },

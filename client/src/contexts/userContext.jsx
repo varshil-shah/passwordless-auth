@@ -57,12 +57,14 @@ const UserProvider = ({ children }) => {
         body: JSON.stringify(user),
       })
         .then((response) => {
-          if (!response.ok) {
-            reject("Error registering user!");
-          }
           return response.json();
         })
         .then((data) => {
+          if (data.status === "fail") {
+            dispatch({ type: "LOADING", payload: false });
+            reject(data.message);
+          }
+
           dispatch({ type: "SUCCESS_AUTH", payload: data.user });
           Cookies.set("token", data.token);
           resolve("User successfully registered!");

@@ -72,6 +72,12 @@ exports.createUser = async (req, res) => {
 
     createSendToken(user, 201, res);
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({
+        status: "fail",
+        message: "User already exists.",
+      });
+    }
     res.status(400).json({
       status: "fail",
       message: error.message,
