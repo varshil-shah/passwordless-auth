@@ -30,6 +30,12 @@ function reducer(state, action) {
         isLoading: false,
         currentUser: action.payload,
       };
+
+    case "DELETE_COOKIE":
+      return {
+        ...state,
+        currentUser: null,
+      };
   }
 }
 
@@ -126,6 +132,11 @@ const UserProvider = ({ children }) => {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  function logout() {
+    Cookies.remove("token");
+    dispatch({ type: "DELETE_COOKIE" });
   }
 
   async function registerChallenge() {
@@ -227,6 +238,7 @@ const UserProvider = ({ children }) => {
         getUser,
         registerChallenge,
         loginChallenge,
+        logout,
       }}
     >
       {children}

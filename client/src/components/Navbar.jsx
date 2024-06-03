@@ -1,8 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { useUser } from "../contexts/userContext";
-import Cookies from "js-cookie";
 
 const NavbarTag = styled.nav`
   background-color: #f8f9fa;
@@ -30,12 +29,14 @@ const MenuItem = styled.li`
 `;
 
 const Navbar = () => {
-  const { currentUser } = useUser();
+  const { currentUser, logout } = useUser();
   const isLoggedIn = !!currentUser;
 
+  const navigate = useNavigate();
+
   function handleLogout() {
-    Cookies.remove("token");
-    window.location.replace("/login");
+    logout();
+    navigate("/login");
   }
 
   return (
@@ -57,7 +58,9 @@ const Navbar = () => {
 
         {isLoggedIn && (
           <MenuItem>
-            <Link onClick={handleLogout}>Logout</Link>
+            <a to="#" onClick={handleLogout}>
+              Logout
+            </a>
           </MenuItem>
         )}
       </NavbarUl>
