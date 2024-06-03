@@ -15,6 +15,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan("dev"));
 
+app.get("/", (req, res) => {
+  res.status(200).end("Welcome to PasswordLess Authentication API");
+});
+
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/challenges", challengeRouter);
 
