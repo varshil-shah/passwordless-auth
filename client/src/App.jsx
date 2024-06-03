@@ -9,6 +9,8 @@ import { UserProvider } from "./contexts/userContext";
 import PrivateRoute from "./components/PrivateRoute";
 
 const App = () => {
+  console.log(import.meta.env.VITE_SERVER_URL);
+
   return (
     <UserProvider>
       <BrowserRouter>

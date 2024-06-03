@@ -5,7 +5,7 @@ import {
   startAuthentication,
 } from "@simplewebauthn/browser";
 
-const HOST = "http://localhost:3000";
+const HOST = import.meta.env.VITE_SERVER_URL;
 
 const initialState = {
   isLoading: false,
